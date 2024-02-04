@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Electric Forecast</title>
+
+    <!-- Link the external CSS file -->
+    <!--link rel="stylesheet" href="C:\Users\hp\Desktop\1\static\css\style.css"-->
+
+    <style>
+        body {
+            background-color: #282c35; /* Dark background color */
+            color: #ffffff; /* White text color */
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh; /* Ensure full viewport height */
+        }
+
+        h1 {
+            color: #00ff00; /* Electric green color */
+        }
+
+        form {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px solid #ffffff;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Customize the input text */
+        form input {
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ffffff;
+            border-radius: 5px;
+            background-color: rgba(255, 255, 255, 0.1); /* Semi-transparent white background */
+            color: #ffffff; /* White text color */
+        }
+
+        /* Customize the submit button */
+        form button {
+            background-color: #ffcc00; /* Electric yellow color */
+            color: #000000; /* Black text */
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        form button:hover {
+            background-color: #ffd700; /* Darker yellow on hover */
+        }
+
+        /* Style the table */
+        table {
+            border-collapse: collapse;
+            width: 80%; /* Adjust the width as needed */
+            margin: 20px 0;
+            background-color: rgba(255, 255, 255, 0.1); /* Semi-transparent white background */
+            border-radius: 10px;
+        }
+
+        table, th, td {
+            border: 1px solid #ffffff;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #00ff00; /* Electric green color for header cells */
+        }
+
+        /* Add a canvas element for the chart */
+        canvas {
+            max-width: 80%; /* Adjust the width as needed */
+            margin: 20px 0;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+        }
+
+        p {
+            text-align: center;
+        }
+        #te{ padding: 10px;
+            margin-bottom: 10px;
+             box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            border: 5px solid #000000;
+            border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.1);
+        color:#ffffff;
+        }
+    </style>
+
+    <!-- Add Chart.js CDN links -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Electric Forecast</h1>
+
+   <form action="/predict" method="post">
+    <label for="start_date">Start Date: </label>
+    <input type="date" id="start_date" name="start_date" required>
+
+    <label for="end_date">End Date: </label>
+    <input type="date" id="end_date" name="end_date" required>
+
+    <button type="submit">Predict</button>
+</form>
+
+
+    {% if predicted_table %}
+    <h2>Predicted Consumption Values</h2>
+    <table>
+        <tr>
+            <th>Date</th>
+            <th>Predicted Consumption</th>
+        </tr>
+        {% for row in predicted_table %}
+        <tr>
+            <td>{{ row.date }}</td>
+            <td>{{ row.predicted_value }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <!-- Add a canvas element for the chart -->
+    <canvas id="myChart"></canvas>
+
+    <script>
+        // JavaScript code to create the chart
+        var ctx = document.getElementById('myChart').getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [{% for row in predicted_table %}'{{ row.date }}', {% endfor %}],
+                datasets: [{
+                    label: 'Predicted Consumption',
+                    data: [{% for row in predicted_table %}{{ row.predicted_value }}, {% endfor %}],
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 4
+                }]
+            },
+            options: {
+                scales: {
+                    x: [{
+                        type: 'time',
+                        time: {
+                            unit: 'day'
+                        },
+                        distribution: 'linear'
+                    }],
+                    y: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        });
+    </script>
+    <br><br><br>
+<div id="te">
+    <p>Total Predicted Consumption Value from <br>{{ start_date }} to {{ end_date }}: <br>{{ total_predicted_value }}</p>
+   <br> {% endif %} </div>
+</body>
+</html>
